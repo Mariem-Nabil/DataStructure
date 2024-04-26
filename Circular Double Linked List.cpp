@@ -1,306 +1,378 @@
-#include <iostream>
-#include <memory>
-#include <stdexcept>
+#include <bits/stdc++.h>
 using namespace std;
 template<class T>
-class Node {
+class node{
 public:
-    T data;
-    Node* next;
-    Node* prev;
+    T info;
+    node* prev;
+    node* next;
 };
-
 template<class T>
-class CircularDoubleLinkedList {
+class CircularDoublyLinkedList{
 private:
-    Node<T>* head;
-    Node<T>* tail;
+    node<T>* head;
+    node<T>* tail;
     int size;
-
 public:
-    CircularDoubleLinkedList() : head(nullptr), tail(nullptr), size(0) {}
+    CircularDoublyLinkedList() {
+        head = tail = nullptr;
+        size = 0;
 
-    void insertAtHead(const T& data) {
-        Node<T>* newNode = new Node<T>();
-        newNode->data = data;
-        newNode->next = nullptr;
-        newNode->prev = nullptr;
-        if (head == nullptr) {
-            head = tail = newNode;
-            tail->next = head;
-            head->prev = tail;
-        }
-        else {
-            newNode->next = head;
-            tail->next = newNode;
-            head = newNode;
-            head->prev = tail;
-        }
-        size++;
     }
 
-    void insertAtTail(const T& data) {
-        Node<T>* newNode = new Node<T>();
-        newNode->data = data;
-        newNode->next = nullptr;
-        newNode->prev = nullptr;
-        if (tail == nullptr) {
-            head = tail = newNode;
-            tail->next = head;
-            head->prev = tail;
-        }
-        else {
-            tail->next = newNode;
-            tail = newNode;
-            tail->next = head;
-            head->prev = tail;
-        }
-        size++;
-    }
-
-    void insertAt(const T& data, int index) {
-        if (index < 0 || index > size) {
-            throw out_of_range("Index out of range");
-        }
-        if (index == 0)
-            insertAtHead(data);
-        else if (index == size)
-            insertAtTail(data);
-        else {
-            Node<T>* tmp = head;
-            for (int i = 0; i < index - 1; ++i) {
-                tmp = tmp->next;
-            }
-            Node<T>* newNode = new Node<T>();
-            newNode->data = data;
-            newNode->next = tmp->next;
-            tmp->next->prev = newNode;
-            tmp->next = newNode;
-            newNode->prev = tmp;
-            size++;
-            tmp = NULL;
-            delete tmp;
-        }
-    }
-
-    
-
-    void removeAtHead() {
-        if (head == nullptr) {
-            throw out_of_range("List is empty");
-        }
-        Node<T>* tmp = head;
-        if (size == 1)
-            head = tail = nullptr;
-        else
-        {
-
-            head = head->next;
-            tail->next = head;
-            head->prev = tail;
-
-        }
-        delete tmp;
-        size--;
-    }
-
-    void removeAtTail() {
-        if (tail == nullptr) {
-            throw out_of_range("List is empty");
-        }
-        Node<T>* tmp = tail;
-
-        tail = tail->prev;
-        tail->next = head;
-        head->prev = tail;
-        delete tmp;
-        size--;
-    }
-
-    void removeAt(int index) {
-        if (index < 0 || index >= size) {
-            throw out_of_range("Index out of range");
-        }
-        if (index == 0)
-            removeAtHead();
-        else if (index == size - 1)
-            removeAtTail();
-        else {
-            Node<T>* tmp = head;
-            for (int i = 0; i < index - 1; ++i) {
-                tmp = tmp->next;
-            }
-            Node<T>* tmp2 = tmp->next;
-            tmp->next = tmp->next->next;
-            tmp->next->prev = tmp;
-            tmp = NULL;
-            delete tmp;
-            delete tmp2;
-        }
-        size--;
-    }
-    T retrieve(int index)
+    void swap(int indexOne, int indexTwo)
     {
-        unique_ptr<Node<T>> tmp = make_unique<Node<T>>(*head);
-        while (index--)
-        {
-            tmp = tmp->next;
-        }
-
-        return tmp->data;
-    }
-
-    void Swap(int idx1, int idx2)
-    {
-        if (idx1 == idx2)
+        if (indexOne == indexTwo)
             return;
-        if (idx1 > idx2)swap(idx1, idx2);
-        Node<T>* tmp = head;
-        Node<T>* prev = tail;
-        Node<T>* next = head->next;
+        if (indexOne > indexTwo)swap(indexOne, indexTwo);
+        node<T>* currentFirstNode = head;
+        node<T>* prevFirstNode = tail;
+        node<T>* nextFirstNode = head->next;
 
-        for (int i = 0; i < idx1; ++i) {
-            prev = tmp;
-            tmp = tmp->next;
-            next = tmp->next;
+        for (int i = 0; i < indexOne; ++i) {
+            prevFirstNode = currentFirstNode;
+            currentFirstNode = currentFirstNode->next;
+            nextFirstNode = currentFirstNode->next;
         }
 
-        Node<T>* tmp2 = head;
-        Node<T>* prev2 = tail;
-        Node<T>* next2 = head->next;
-        for (int i = 0; i < idx2; ++i) {
-            prev2 = tmp2;
-            tmp2 = tmp2->next;
-            next2 = tmp2->next;
+        node<T>* currentSecondNode = head;
+        node<T>* prevSecondNode = tail;
+        node<T>* nextSecondNode = head->next;
+        for (int i = 0; i < indexTwo; ++i) {
+            prevSecondNode = currentSecondNode;
+            currentSecondNode = currentSecondNode->next;
+            nextSecondNode = currentSecondNode->next;
         }
-        if (idx2 - idx1 == 1)
+        if (indexTwo == size - 1 && indexOne == 0)
+        {
+            currentSecondNode->next = currentFirstNode->next;
+            currentFirstNode->next = currentSecondNode;
+            prevSecondNode->next = currentFirstNode;
+            tail = currentFirstNode;
+            head = currentSecondNode;
+            head->prev = tail;
+            tail->next = head;
+
+        }
+        else if (indexTwo - indexOne == 1)
         {
             if (size == 2)
             {
                 head = tail;
 
-                tail = tmp;
+                tail = currentFirstNode;
             }
             else {
 
-                tmp2->next = tmp;
-                tmp->next = next2;
-                tmp2->prev = prev;
-                tmp->prev = tmp2;
-                next2->prev = tmp;
-                prev->next = tmp2;
-                if (idx1 == 0)
+                currentSecondNode->next = currentFirstNode;
+                currentFirstNode->next = nextSecondNode;
+                currentSecondNode->prev = prevFirstNode;
+                currentFirstNode->prev = currentSecondNode;
+                nextSecondNode->prev = currentFirstNode;
+                prevFirstNode->next = currentSecondNode;
+                if (indexOne == 0)
                 {
-                    tmp2->prev = tail;
-                    tail->next = tmp2;
-                    head = tmp2;
+                    currentSecondNode->prev = tail;
+                    tail->next = currentSecondNode;
+                    head = currentSecondNode;
                 }
-                if (idx2 == size - 1)
+                if (indexTwo == size - 1)
                 {
-                    tmp->next = head;
-                    head->prev = tmp;
-                    tail = tmp;
+                    currentFirstNode->next = head;
+                    head->prev = currentFirstNode;
+                    tail = currentFirstNode;
                 }
             }
 
-
-        }
-        else if (idx2 == size - 1 && idx1 == 0)
-        {
-            tmp2->next = tmp->next;
-            tmp->next = tmp2;
-            prev2->next = tmp;
-            tail = tmp;
-            head = tmp2;
-            head->prev = tail;
-            tail->next = head;
 
         }
         else
         {
 
-            tmp->next = next2;
-            tmp2->next = next;
-            prev->next = tmp2;
-            tmp2->prev = prev;
-            prev2->next = tmp;
-            tmp->prev=prev2;
+            currentFirstNode->next = nextSecondNode;
+            currentSecondNode->next = nextFirstNode;
+            prevFirstNode->next = currentSecondNode;
+            currentSecondNode->prev = prevFirstNode;
+            prevSecondNode->next = currentFirstNode;
+            currentFirstNode->prev=prevSecondNode;
         }
 
 
     }
+    void replaceAt(T newElement, int index) {
+        if(index==0){
+            head->info=newElement;
 
-    void replace(const T& data, int index) {
-        if (index < 0 || index >= size) {
-            throw out_of_range("Index out of range");
         }
-        Node<T>* tmp = head;
-        for (int i = 0; i < index; ++i) {
-            tmp = tmp->next;
+        else if(index == size - 1){
+            tail->info=newElement;
+
         }
-        tmp->data = data;
+        else{
+            node<T> *current;
+            current = head;
+            int countnode=0;
+            while(countnode<index){
+                current=current->next;
+                countnode++;
+            }
+            current->info=newElement;
+
+        }
+
     }
+    void insertAt(T element, int index) {
+        if(index==0){
+            insertAtHead(element);
+        }
+        else if(index == size - 1){
+            insertAtTail(element);
+        }
+        else{
+            node<T> *current;
+            node<T> *prevcurrent;
+            current = head;
+            int countnode=0;
+            node<T>* newNode;
+            newNode=new node<T>;
+            newNode->info=element;
+            newNode->prev=NULL;
+            newNode->next=NULL;
+            while(countnode<index){
+                current=current->next;
+                countnode++;
+            }
+            prevcurrent=current->prev;
+            newNode->next=current;
+            current->prev=newNode;
+            prevcurrent->next=newNode;
+            newNode->prev=prevcurrent;
+            size++;
 
-    bool isExist(const T& data) {
-        unique_ptr<Node<T>> tmp = make_unique<Node<T>>(*head);
-        while (tmp != nullptr) {
-            if (tmp->data == data) {
+
+        }
+
+    }
+    T retrieveAt(int index) {
+        node<T> *current;
+        current = head;
+        int countnode=0;
+        while(countnode<index){
+            current=current->next;
+            countnode++;
+        }
+        return current->info;
+
+    }
+    void clear() {
+        node<T> *current;
+        while(size--){
+            current = head;
+            head=head->next;
+            delete current;
+        }
+        size=0;
+        head=NULL;
+        tail=NULL;
+
+    }
+    bool isItemAtEqual(T element, int index) {
+        int countnode=0;
+        node<T> *current;
+        current = head;
+        if(index<0|| index>size)
+        {
+            cout<<"invaild index\n";
+        }
+        else
+        {
+
+            while(countnode<index){
+                current=current->next;
+                countnode++;
+            }
+            if(current->info==element){
                 return true;
             }
-            tmp = tmp->next;
+            else{
+                return false;
+            }
+
+        }
+    }
+    void removeAt(int index) {
+        if(head == NULL){
+            cout<<"can not delete from empty list";
+        }
+        else {
+            if (index == 0) {
+                removeAtHead();
+            }
+
+            else if (index == size - 1) {
+                removeAtTail();
+
+            }
+            else {
+                node<T> *current;
+                node<T> *prevcurrent;
+                current = head;
+                int countnode=0;
+                while(countnode<index){
+                    current=current->next;
+                    countnode++;
+                }
+                prevcurrent=current->prev;
+                prevcurrent->next=current->next;
+                prevcurrent->next->prev=prevcurrent;
+                size--;
+                delete current;
+            }
+        }
+    }
+    void removeAtTail() {
+        if(tail != NULL){
+            node<T> *current;
+            current =tail;
+            tail=tail->prev;
+            if(tail != NULL){
+                tail->next=head;
+                head->prev=tail;
+            }
+            else{
+                head=NULL;
+            }
+            size--;
+            delete current;
+        }
+    }
+    void removeAtHead() {
+        if(head != NULL){
+            node<T> *current;
+            current = head;
+            head=head->next;
+            if(head != NULL){
+                head->prev=tail;
+                tail->next=head;
+            }
+            else{
+                tail=NULL;
+            }
+            size--;
+            delete current;
+        }
+    }
+    bool isExist(T element) {
+        node<T> *current;
+        current = head;
+        int sz=size;
+        while (sz--) {
+            if(current->info==element){
+                return true;
+            }
+            current = current->next;
         }
         return false;
     }
-
-    bool isItemAtEqual(const T& data, int index) {
-        if (index < 0 || index >= size) {
-            throw out_of_range("Index out of range");
+    void print() {
+        node<T> *current;
+        current = head;
+        if(isEmpty()){
+            cout<<"empty list"<<endl;
         }
-        return data == retrieve(index);
+        else{
+            int sz= size;
+            while (sz--) {
+                cout << current->info<<" ";
+                current = current->next;
+            }
+        }
     }
-
-    bool isEmpty() {
-        return size == 0;
-    }
-
     int linkedListSize() {
         return size;
     }
 
-    void clear() {
-  
-        while (size--) {
-            Node<T>* tmp = head;
-            head = head->next;
-            delete tmp;
+    bool isEmpty() {
+        if(size == 0){
+            return true;
         }
-        tail = nullptr;
-        size = 0;
+        else{
+            return false;
+        }
+    }
+    void insertAtTail(T element) {
+        node<T>* newNode;
+        newNode=new node<T>;
+        newNode->info=element;
+        newNode->prev=NULL;
+        newNode->next=NULL;
+        if(head == NULL){
+            head=newNode;
+            tail=newNode;
+            tail->next=head;
+            head->prev=tail;
+            size++;
+        }
+        else{
+            tail->next=newNode;
+            newNode->prev=tail;
+            tail=newNode;
+            head->prev=tail;
+            tail->next= head;
+            size++;
+        }
     }
 
-    void print() {
-        Node<T>* tmp = head;
-        int  cnt = 0;
-        while (cnt++ < size) {
-            cout << tmp->data << " ";
-            tmp = tmp->next;
+    void insertAtHead(T element) {
+        node<T>* newNode;
+        newNode=new node<T>;
+        newNode->info=element;
+        newNode->prev=NULL;
+        newNode->next=NULL;
+        if(head == NULL){
+            head=newNode;
+            tail=newNode;
+            tail->next=head;
+            head->prev=tail;
+            size++;
         }
-        cout << "\n";
-        tmp = NULL;
-        delete tmp;
-    }
+        else{
 
-
-    Node<T>*& Head()
-    {
-        return head;
+            newNode->next=head;
+            head->prev=newNode;
+            head=newNode;
+            newNode->prev=tail;
+            tail->next=newNode;
+            size++;
+        }
     }
 };
 
-
-
 int main() {
-  
-
+    CircularDoublyLinkedList<int> d;
+    d.insertAtHead(50);
+    d.insertAtHead(55);
+    d.insertAtTail(13);
+    d.insertAtHead(10);
+    d.print();
+    cout<<endl;
+    d.insertAt(60,2);
+    d.print();
+    cout<<endl;
+    d.replaceAt(65,2);
+    d.print();
+    cout<<endl;
+    cout<<d.retrieveAt(0)<<endl;
+    d.swap(1,2);
+    d.print();
+    cout<<endl;
+    d.removeAt(3);
+    d.print();
+    cout<<d.linkedListSize()<<endl;
+    cout<<d.isItemAtEqual(65,1)<<endl;
+    cout<<d.isExist(13)<<endl;
+    cout<<d.isExist(50)<<endl;
+    d.clear();
+    cout<<d.isEmpty();
     return 0;
 }
